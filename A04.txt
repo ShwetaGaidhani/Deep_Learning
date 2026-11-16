@@ -1,0 +1,457 @@
+#!pip install tensorflow numpy matplotlib scikit-learn
+
+#short
+
+# Step 1: Import Libraries
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+# Step 2: Load Local MNIST Dataset
+data = np.load("mnist.npz")
+
+x_train = data["x_train"].reshape(-1, 784).astype("float32") / 255.0
+y_train = data["y_train"]
+
+x_test = data["x_test"].reshape(-1, 784).astype("float32") / 255.0
+y_test = data["y_test"]
+
+# Step 3: Define Activation Functions
+activations = ['sigmoid', 'tanh', 'relu']
+results = {}
+gradients_result = {}
+
+# Step 4: Train Models and Calculate Gradients
+for act in activations:
+
+    model = tf.keras.Sequential([
+        tf.keras.layers.Input(shape=(784,)),
+        tf.keras.layers.Dense(128, activation=act),
+        tf.keras.layers.Dense(64, activation=act),
+        tf.keras.layers.Dense(10, activation='softmax')
+    ])
+
+    model.compile(optimizer='adam',
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    start = time.time()
+
+    history = model.fit(x_train, y_train, epochs=5,
+                        batch_size=128, validation_split=0.2,
+                        verbose=1)
+
+    training_time = time.time() - start
+    loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+
+    results[act] = [model, history.history, training_time, accuracy]
+
+    # Calculate Gradients
+    with tf.GradientTape() as tape:
+        predictions = model(x_train[:128], training=True)
+        loss = tf.reduce_mean(
+            tf.keras.losses.sparse_categorical_crossentropy(
+                y_train[:128], predictions
+            )
+        )
+
+    grads = tape.gradient(loss, model.trainable_variables)
+
+    gradients_result[act] = [
+        tf.reduce_mean(tf.abs(g)).numpy()
+        for g in grads if g is not None
+    ]
+
+    print(act, "Accuracy:", accuracy * 100, "%")
+    print("Training Time:", training_time, "seconds")
+
+
+# Step 5: Plot Accuracy and Loss
+for metric in ['accuracy', 'loss']:
+    for act in activations:
+        plt.plot(results[act][1][metric], label=act)
+
+    plt.title(metric.capitalize() + " Comparison")
+    plt.xlabel("Epochs")
+    plt.ylabel(metric.capitalize())
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+
+# Step 6: Plot Training Time
+plt.bar(activations, [results[a][2] for a in activations])
+plt.title("Training Time Comparison")
+plt.xlabel("Activation Function")
+plt.ylabel("Time (seconds)")
+plt.show()
+
+
+# Step 7: Plot Gradient Flow
+for act in activations:
+    plt.plot(gradients_result[act], marker='o', label=act)
+
+plt.title("Gradient Flow Comparison")
+plt.xlabel("Trainable Parameter Tensors")
+plt.ylabel("Mean Absolute Gradient")
+plt.legend()
+plt.grid()
+plt.show()
+
+
+# Step 8: Display Final Results
+print("\nFINAL COMPARISON")
+
+for act in activations:
+    print("\nActivation:", act)
+    print("Test Accuracy:", results[act][3] * 100, "%")
+    print("Training Time:", results[act][2], "seconds")
+    print("Gradient Values:", gradients_result[act])
+
+
+# mnist.npz
+
+# Step 1: Import libraries
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+# Step 2: Load Local MNIST NPZ Dataset
+data = np.load("mnist.npz")
+
+x_train = data["x_train"].reshape(-1, 784).astype("float32") / 255.0
+y_train = data["y_train"]
+
+x_test = data["x_test"].reshape(-1, 784).astype("float32") / 255.0
+y_test = data["y_test"]
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+'''
+# Step 2: Load Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+'''
+(x_train, y_train), (x_test, y_test) = (
+    (np.fromfile('MNIST/train-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/train-labels-idx1-ubyte', np.uint8)[8:]),
+    (np.fromfile('MNIST/t10k-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/t10k-labels-idx1-ubyte', np.uint8)[8:])
+)
+'''
+'''
+
+# Step 3: Define Activation Functions
+activations = ['sigmoid', 'tanh', 'relu']
+results = {}
+
+# Step 4: Train MLP using different activation functions
+for act in activations:
+
+    model = tf.keras.Sequential([
+        tf.keras.layers.Input(shape=(784,)),
+        tf.keras.layers.Dense(128, activation=act),
+        tf.keras.layers.Dense(64, activation=act),
+        tf.keras.layers.Dense(10, activation='softmax')
+    ])
+
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+
+    start = time.time()
+
+    history = model.fit(
+        x_train, y_train,
+        epochs=5,
+        batch_size=128,
+        validation_split=0.2,
+        verbose=1
+    )
+
+    training_time = time.time() - start
+
+    loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+
+    results[act] = {
+        'model': model,
+        'history': history.history,
+        'time': training_time,
+        'accuracy': accuracy
+    }
+
+    print(act, "Accuracy:", accuracy * 100)
+    print("Training Time:", training_time)
+
+
+# Step 5: Plot Training Accuracy
+for act in activations:
+    plt.plot(results[act]['history']['accuracy'], label=act)
+
+plt.title("Training Accuracy Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.grid()
+plt.show()
+
+
+# Step 6: Plot Training Loss
+for act in activations:
+    plt.plot(results[act]['history']['loss'], label=act)
+
+plt.title("Training Loss Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.grid()
+plt.show()
+
+
+# Step 7: Plot Training Time
+plt.bar(activations, [results[a]['time'] for a in activations])
+plt.title("Training Time Comparison")
+plt.xlabel("Activation Function")
+plt.ylabel("Time (seconds)")
+plt.show()
+
+
+# Step 8: Calculate Actual Gradient Flow
+x = tf.convert_to_tensor(x_train[:128], dtype=tf.float32)
+y = tf.convert_to_tensor(y_train[:128], dtype=tf.int64)
+
+gradient_values = {}
+
+for act in activations:
+
+    model = results[act]['model']
+
+    with tf.GradientTape() as tape:
+        predictions = model(x, training=True)
+
+        loss = tf.keras.losses.sparse_categorical_crossentropy(
+            y, predictions
+        )
+        loss = tf.reduce_mean(loss)
+
+    gradients = tape.gradient(loss, model.trainable_variables)
+
+    gradient_values[act] = [
+        tf.reduce_mean(tf.abs(g)).numpy()
+        for g in gradients if g is not None
+    ]
+
+
+# Step 9: Plot Gradient Flow Comparison
+for act in activations:
+    plt.plot(
+        range(1, len(gradient_values[act]) + 1),
+        gradient_values[act],
+        marker='o',
+        label=act
+    )
+
+plt.title("Actual Gradient Flow Comparison")
+plt.xlabel("Network Layers (Weights and Biases)")
+plt.ylabel("Mean Absolute Gradient")
+plt.legend()
+plt.grid()
+plt.show()
+
+
+# Step 10: Display Final Results
+print("\nFINAL COMPARISON")
+
+for act in activations:
+    print("\nActivation:", act)
+    print("Accuracy:", results[act]['accuracy'] * 100, "%")
+    print("Training Time:", results[act]['time'], "seconds")
+    print("Gradient Values:", gradient_values[act])
+
+
+# using local dataset folder
+
+# Step 1: Import libraries
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+import struct
+
+# Step 2: Load Local MNIST Dataset
+
+def load_images(file):
+    with open(file, 'rb') as f:
+        magic, num, rows, cols = struct.unpack('>IIII', f.read(16))
+        images = np.frombuffer(f.read(), dtype=np.uint8)
+    return images.reshape(num, rows * cols)
+
+def load_labels(file):
+    with open(file, 'rb') as f:
+        magic, num = struct.unpack('>II', f.read(8))
+        labels = np.frombuffer(f.read(), dtype=np.uint8)
+    return labels
+
+x_train = load_images('MNIST/train-images-idx3-ubyte').astype('float32') / 255.0
+y_train = load_labels('MNIST/train-labels-idx1-ubyte')
+
+x_test = load_images('MNIST/t10k-images-idx3-ubyte').astype('float32') / 255.0
+y_test = load_labels('MNIST/t10k-labels-idx1-ubyte')
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+
+'''
+# Step 2: Load Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+'''
+(x_train, y_train), (x_test, y_test) = (
+    (np.fromfile('MNIST/train-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/train-labels-idx1-ubyte', np.uint8)[8:]),
+    (np.fromfile('MNIST/t10k-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/t10k-labels-idx1-ubyte', np.uint8)[8:])
+)
+'''
+'''
+
+# Step 3: Define Activation Functions
+activations = ['sigmoid', 'tanh', 'relu']
+results = {}
+
+# Step 4: Train MLP using different activation functions
+for act in activations:
+
+    model = tf.keras.Sequential([
+        tf.keras.layers.Input(shape=(784,)),
+        tf.keras.layers.Dense(128, activation=act),
+        tf.keras.layers.Dense(64, activation=act),
+        tf.keras.layers.Dense(10, activation='softmax')
+    ])
+
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+
+    start = time.time()
+
+    history = model.fit(
+        x_train, y_train,
+        epochs=5,
+        batch_size=128,
+        validation_split=0.2,
+        verbose=1
+    )
+
+    training_time = time.time() - start
+
+    loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+
+    results[act] = {
+        'model': model,
+        'history': history.history,
+        'time': training_time,
+        'accuracy': accuracy
+    }
+
+    print(act, "Accuracy:", accuracy * 100)
+    print("Training Time:", training_time)
+
+# Step 5: Plot Training Accuracy
+for act in activations:
+    plt.plot(results[act]['history']['accuracy'], label=act)
+
+plt.title("Training Accuracy Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.grid()
+plt.show()
+
+# Step 6: Plot Training Loss
+for act in activations:
+    plt.plot(results[act]['history']['loss'], label=act)
+
+plt.title("Training Loss Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.grid()
+plt.show()
+
+# Step 7: Plot Training Time
+plt.bar(activations, [results[a]['time'] for a in activations])
+plt.title("Training Time Comparison")
+plt.xlabel("Activation Function")
+plt.ylabel("Time (seconds)")
+plt.show()
+
+# Step 8: Calculate Actual Gradient Flow
+x = tf.convert_to_tensor(x_train[:128], dtype=tf.float32)
+y = tf.convert_to_tensor(y_train[:128], dtype=tf.int64)
+
+gradient_values = {}
+
+for act in activations:
+
+    model = results[act]['model']
+
+    with tf.GradientTape() as tape:
+        predictions = model(x, training=True)
+
+        loss = tf.keras.losses.sparse_categorical_crossentropy(
+            y, predictions
+        )
+        loss = tf.reduce_mean(loss)
+
+    gradients = tape.gradient(loss, model.trainable_variables)
+
+    gradient_values[act] = [
+        tf.reduce_mean(tf.abs(g)).numpy()
+        for g in gradients if g is not None
+    ]
+
+# Step 9: Plot Gradient Flow Comparison
+for act in activations:
+    plt.plot(
+        range(1, len(gradient_values[act]) + 1),
+        gradient_values[act],
+        marker='o',
+        label=act
+    )
+
+plt.title("Actual Gradient Flow Comparison")
+plt.xlabel("Network Layers (Weights and Biases)")
+plt.ylabel("Mean Absolute Gradient")
+plt.legend()
+plt.grid()
+plt.show()
+
+# Step 10: Display Final Results
+print("\nFINAL COMPARISON")
+
+for act in activations:
+    print("\nActivation:", act)
+    print("Accuracy:", results[act]['accuracy'] * 100, "%")
+    print("Training Time:", results[act]['time'], "seconds")
+    print("Gradient Values:", gradient_values[act])

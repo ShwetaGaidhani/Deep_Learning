@@ -1,0 +1,431 @@
+#mnist.npz imp
+
+# Step I: Import the libraries
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
+from tensorflow.keras.utils import to_categorical
+
+
+# Step II: Load the Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+'''
+# Step 2: Load Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+
+(x_train, y_train), (x_test, y_test) = (
+    (np.fromfile('MNIST/train-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/train-labels-idx1-ubyte', np.uint8)[8:]),
+    (np.fromfile('MNIST/t10k-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/t10k-labels-idx1-ubyte', np.uint8)[8:])
+)
+
+'''  
+
+# Step III: Preprocessing
+
+# Flattening + Normalization
+x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
+x_test = x_test.reshape(-1, 784).astype('float32') / 255.0
+
+# One Hot Encoding
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
+
+
+# Step IV: Model 1 - One Hidden Layer with ReLU
+model1 = tf.keras.Sequential([
+    tf.keras.Input(shape=(784,)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+model1.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+history1 = model1.fit(
+    x_train, y_train,
+    epochs=5,
+    batch_size=128,
+    validation_split=0.1
+)
+
+print("Model 1 training completed!")
+
+
+# Step V: Model 2 - Two Hidden Layers with ReLU
+model2 = tf.keras.Sequential([
+    tf.keras.Input(shape=(784,)),
+    tf.keras.layers.Dense(264, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+model2.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+history2 = model2.fit(
+    x_train, y_train,
+    epochs=5,
+    batch_size=128,
+    validation_split=0.1
+)
+
+print("Model 2 training completed!")
+
+
+# Step VI: Model 3 - Two Hidden Layers with Tanh
+model3 = tf.keras.Sequential([
+    tf.keras.Input(shape=(784,)),
+    tf.keras.layers.Dense(264, activation='tanh'),
+    tf.keras.layers.Dense(128, activation='tanh'),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+model3.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+history3 = model3.fit(
+    x_train, y_train,
+    epochs=5,
+    batch_size=128,
+    validation_split=0.1
+)
+
+print("Model 3 training completed!")
+
+
+# Step VII: Evaluate Models on Test Data
+loss1, acc1 = model1.evaluate(x_test, y_test, verbose=0)
+loss2, acc2 = model2.evaluate(x_test, y_test, verbose=0)
+loss3, acc3 = model3.evaluate(x_test, y_test, verbose=0)
+
+print("\nModel 1 Accuracy:", acc1 * 100, "%")
+print("Model 2 Accuracy:", acc2 * 100, "%")
+print("Model 3 Accuracy:", acc3 * 100, "%")
+
+print("\nModel 1 Loss:", loss1)
+print("Model 2 Loss:", loss2)
+print("Model 3 Loss:", loss3)
+
+
+# Step VIII: Compare Model Accuracy
+models = ['1 Hidden Layer', '2 Hidden Layers ReLU', '2 Hidden Layers Tanh']
+accuracy = [acc1 * 100, acc2 * 100, acc3 * 100]
+
+plt.figure(figsize=(8, 5))
+plt.bar(models, accuracy)
+
+plt.title("Comparison of Model Accuracy")
+plt.xlabel("Model Configuration")
+plt.ylabel("Accuracy (%)")
+plt.xticks(rotation=15)
+plt.tight_layout()
+plt.show()
+
+
+# Step IX: Visualize Loss Curve
+plt.figure(figsize=(7, 4))
+
+plt.plot(history1.history['val_loss'], label='1 Hidden Layer ReLU')
+plt.plot(history2.history['val_loss'], label='2 Hidden Layers ReLU')
+plt.plot(history3.history['val_loss'], label='2 Hidden Layers Tanh')
+
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.title("Validation Loss Comparison")
+plt.legend()
+plt.tight_layout()
+plt.grid()
+plt.show()
+
+
+# Step X: Visualize Accuracy Curve
+plt.figure(figsize=(7, 4))
+
+plt.plot(history1.history['val_accuracy'], label='1 Hidden Layer ReLU')
+plt.plot(history2.history['val_accuracy'], label='2 Hidden Layers ReLU')
+plt.plot(history3.history['val_accuracy'], label='2 Hidden Layers Tanh')
+
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.title("Validation Accuracy Comparison")
+plt.legend()
+plt.tight_layout()
+plt.grid()
+plt.show()
+
+# Step I: Import the libraries
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
+from tensorflow.keras.utils import to_categorical
+
+# Step II: Load the Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+'''
+# Step 2: Load Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+
+(x_train, y_train), (x_test, y_test) = (
+    (np.fromfile('MNIST/train-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/train-labels-idx1-ubyte', np.uint8)[8:]),
+    (np.fromfile('MNIST/t10k-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/t10k-labels-idx1-ubyte', np.uint8)[8:])
+)
+'''
+
+# Step III: Preprocessing
+
+# Flattening + Normalization
+x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
+x_test = x_test.reshape(-1, 784).astype('float32') / 255.0
+
+# One Hot Encoding
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
+
+# Step IV: Model Configuration
+model = tf.keras.Sequential([
+    tf.keras.Input(shape=(784,)),
+    tf.keras.layers.Dense(264, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+# Step V: Model Compilation
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Step VI: Train the Model
+history = model.fit(
+    x_train, y_train,
+    epochs=10,
+    batch_size=64,
+    validation_split=0.1
+)
+
+# Step VII: Evaluate the Model
+loss, accuracy = model.evaluate(x_test, y_test)
+
+print("\nTest Loss:", loss)
+print("Test Accuracy:", accuracy * 100, "%")
+
+# Step VIII: Testing
+predicted = model.predict(x_test[:1])
+predicted_class = tf.argmax(predicted[0]).numpy()
+
+print("Predicted Class:", predicted_class)
+print("Actual Class:", tf.argmax(y_test[0]).numpy())
+
+# Step IX: Visualize Loss Curve
+plt.figure(figsize=(6, 4))
+
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.title("Training and Validation Loss Curve")
+plt.legend()
+plt.tight_layout()
+plt.grid()
+plt.show()
+
+# Step X: Visualize Accuracy Curve
+plt.figure(figsize=(6, 4))
+
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.title("Training and Validation Accuracy Curve")
+plt.legend()
+plt.tight_layout()
+plt.grid()
+plt.show()
+
+
+#%pip install tensorflow numpy matplotlib scikit-learn 
+
+# local dataset 
+
+# Step I: Import the libraries
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
+import struct
+
+from tensorflow.keras.utils import to_categorical
+
+
+# Step II: Load the Local MNIST Dataset
+'''
+# Step 2: Load Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+
+(x_train, y_train), (x_test, y_test) = (
+    (np.fromfile('MNIST/train-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/train-labels-idx1-ubyte', np.uint8)[8:]),
+    (np.fromfile('MNIST/t10k-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/t10k-labels-idx1-ubyte', np.uint8)[8:])
+)
+
+'''
+# Load Images
+def load_images(file):
+    with open(file, 'rb') as f:
+        magic, num, rows, cols = struct.unpack('>IIII', f.read(16))
+        images = np.frombuffer(f.read(), dtype=np.uint8)
+
+    return images.reshape(num, rows, cols)
+
+
+# Load Labels
+def load_labels(file):
+    with open(file, 'rb') as f:
+        magic, num = struct.unpack('>II', f.read(8))
+        labels = np.frombuffer(f.read(), dtype=np.uint8)
+
+    return labels
+
+
+# Load Dataset
+x_train = load_images('MNIST/train-images-idx3-ubyte')
+y_train = load_labels('MNIST/train-labels-idx1-ubyte')
+
+x_test = load_images('MNIST/t10k-images-idx3-ubyte')
+y_test = load_labels('MNIST/t10k-labels-idx1-ubyte')
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+
+
+# Step III: Preprocessing
+
+# Flattening + Normalization
+x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
+x_test = x_test.reshape(-1, 784).astype('float32') / 255.0
+
+# One Hot Encoding
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
+
+
+# Step IV: Model Configuration
+model = tf.keras.Sequential([
+    tf.keras.Input(shape=(784,)),
+    tf.keras.layers.Dense(264, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+
+# Step V: Model Compilation
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+
+# Step VI: Train the Model
+history = model.fit(
+    x_train, y_train,
+    epochs=10,
+    batch_size=64,
+    validation_split=0.1
+)
+
+
+# Step VII: Evaluate the Model
+loss, accuracy = model.evaluate(x_test, y_test)
+
+print("\nTest Loss:", loss)
+print("Test Accuracy:", accuracy * 100, "%")
+
+
+# Step VIII: Testing
+predicted = model.predict(x_test[:1])
+predicted_class = tf.argmax(predicted[0]).numpy()
+
+print("Predicted Class:", predicted_class)
+print("Actual Class:", tf.argmax(y_test[0]).numpy())
+
+
+# Step IX: Visualize Loss Curve
+plt.figure(figsize=(6, 4))
+
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.title("Training and Validation Loss Curve")
+plt.legend()
+plt.tight_layout()
+plt.grid()
+plt.show()
+
+
+# Step X: Visualize Accuracy Curve
+plt.figure(figsize=(6, 4))
+
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.title("Training and Validation Accuracy Curve")
+plt.legend()
+plt.tight_layout()
+plt.grid()
+plt.show()

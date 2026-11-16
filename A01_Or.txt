@@ -1,0 +1,126 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Step 1: Activation Function
+def step_function(x):
+    if x >= 0:
+        return 1
+    else:
+        return 0
+
+# Step 2: Create Perceptron Class
+class Perceptron:
+    def __init__(self, input_size, learning_rate=0.1, epochs=10):
+        self.weights = np.zeros(input_size + 1)
+        self.lr = learning_rate
+        self.epochs = epochs
+
+    # Prediction
+    def predict(self, x):
+        x = np.insert(x, 0, 1)
+        weighted_sum = np.dot(self.weights, x)
+        return step_function(weighted_sum)
+
+    # Training
+    def train(self, X, y):
+        for epoch in range(self.epochs):
+            for xi, target in zip(X, y):
+                xi = np.insert(xi, 0, 1)
+                output = step_function(np.dot(self.weights, xi))
+                error = target - output
+                self.weights += self.lr * error * xi
+            print(f"Epoch {epoch+1}: Weights = {self.weights}")
+
+# Step 3: OR Gate Dataset
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([0, 1, 1, 1])
+
+print("OR Gate Input:")
+print(X)
+print("\nTarget Output:")
+print(y)
+
+# Step 4: Create and Train Perceptron
+perceptron = Perceptron(input_size=2, learning_rate=0.1, epochs=10)
+print("\nTraining Perceptron:\n")
+perceptron.train(X, y)
+
+# Step 5: Display Predictions
+print("\nOR Gate Predictions:\n")
+for x in X:
+    prediction = perceptron.predict(x)
+    print(f"Input: {x} --> Output: {prediction}")
+
+# Step 6: Visualize Decision Boundary
+x_min, x_max = -0.5, 1.5
+y_min, y_max = -0.5, 1.5
+
+xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.01),
+                     np.arange(y_min, y_max, 0.01))
+
+Z = []
+for point in np.c_[xx.ravel(), yy.ravel()]:
+    Z.append(perceptron.predict(point))
+
+Z = np.array(Z).reshape(xx.shape)
+
+plt.figure(figsize=(6, 5))
+plt.contourf(xx, yy, Z, alpha=0.3, cmap="coolwarm")
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap="coolwarm", edgecolors="black", s=120)
+plt.xlabel("Input 1")
+plt.ylabel("Input 2")
+plt.title("Perceptron Decision Boundary (OR Gate)")
+plt.grid(True)
+plt.show()
+
+#other 
+
+#step I: import libraries
+import numpy as np
+import matplotlib.pyplot as plt
+
+# step II: Create datasets
+x = np.array([[0,0],[0,1],[1,0],[1,1]])
+y = np.array([0,1,1,1])
+
+# step III: initializations
+weights = np.zeros(2)
+bias = 0
+lr = 0.1
+epochs=10
+
+# step IV: activation function
+def activation(z):
+    if z>=0:
+        return 1
+    return 0
+
+# stev V : Training process
+for epoch in range(epochs):
+    for i in range(4):
+        # formula
+        z = np.dot(x[i],weights) + bias
+        # activation function
+        y_pred = activation(z)
+        # calc error
+        error = y[i] - y_pred
+        # update weights and bias
+        weights = weights + lr*error*x[i]
+        bias = bias + lr*error
+
+# step VI: Testing
+for i in range(4):
+    z = np.dot(x[i],weights) + bias
+    y_pred = activation(z)
+    print(x[i],y_pred)
+
+# Step VII: Visualize
+plt.plot(x[:,0],x[:,1],'bo',label='data points')
+test_x = np.linspace(-0.5,1.5,100)
+test_y = -(weights[0]*test_x + bias)/weights[1]
+plt.plot(test_x,test_y,'r-',label='decision boundary')
+plt.xlabel("x1")
+plt.ylabel("y1")
+plt.legend()
+plt.grid()
+plt.plot()

@@ -1,0 +1,224 @@
+#pip install numpy pandas matplotlib tensorflow scikit-learn #%pip install tensorflow numpy matplotlib pandas scikit-learn scipy %pip install torch torchvision seaborn
+
+# LSTM 
+
+# Step 1: Import Libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, LSTM, Dense
+from sklearn.model_selection import train_test_split
+
+# Step 2: Load IMDB Dataset
+data = pd.read_csv("IMDB_Dataset.csv")
+
+print("Dataset Shape:", data.shape)
+
+# Step 3: Prepare Data
+X = data['review'].astype(str)
+y = data['sentiment'].map({'positive': 1, 'negative': 0})
+
+# Step 4: Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Step 5: Tokenization and Padding
+tokenizer = Tokenizer(num_words=10000, oov_token="<OOV>")
+tokenizer.fit_on_texts(X_train)
+
+X_train = tokenizer.texts_to_sequences(X_train)
+X_test = tokenizer.texts_to_sequences(X_test)
+
+X_train = pad_sequences(X_train, maxlen=200, padding='post')
+X_test = pad_sequences(X_test, maxlen=200, padding='post')
+
+# Step 6: Build LSTM Model
+model = Sequential([
+    Embedding(10000, 32),
+    LSTM(32),
+    Dense(1, activation='sigmoid')
+])
+
+# Step 7: Compile Model
+model.compile(
+    optimizer='adam',
+    loss='binary_crossentropy',
+    metrics=['accuracy']
+)
+
+# Step 8: Train Model
+history = model.fit(
+    X_train, y_train,
+    epochs=5,
+    batch_size=64,
+    validation_split=0.2
+)
+
+# Step 9: Evaluate Model
+loss, accuracy = model.evaluate(X_test, y_test)
+print("Test Accuracy:", round(accuracy * 100, 2), "%")
+
+# Step 10: Plot Accuracy
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title("LSTM Model Accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.grid()
+plt.show()
+
+# Step 11: Example Predictions
+predictions = model.predict(X_test[:5])
+
+print("\nActual vs Predicted Sentiment")
+
+for i in range(5):
+    actual = "Positive" if y_test.iloc[i] == 1 else "Negative"
+    predicted = "Positive" if predictions[i][0] >= 0.5 else "Negative"
+
+    print("\nReview:", i + 1)
+    print("Actual Sentiment:", actual)
+    print("Predicted Sentiment:", predicted) 
+
+
+# IMDB CSV
+
+# Step 1: Import Libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout
+from sklearn.model_selection import train_test_split
+
+# Step 2: Load CSV Dataset
+data = pd.read_csv("IMDB_Dataset.csv")
+
+print(data.head())
+print("Dataset Shape:", data.shape)
+
+# Step 3: Prepare Data
+data['sentiment'] = data['sentiment'].map({
+    'positive': 1, 'negative': 0
+})
+
+X = data['review'].astype(str).values
+y = data['sentiment'].values
+
+# Step 4: Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Step 5: Tokenization
+vocab_size = 10000
+max_length = 200
+
+tokenizer = Tokenizer(num_words=vocab_size, oov_token="<OOV>")
+tokenizer.fit_on_texts(X_train)
+
+X_train = tokenizer.texts_to_sequences(X_train)
+X_test = tokenizer.texts_to_sequences(X_test)
+
+X_train = pad_sequences(X_train, maxlen=max_length, padding='post')
+X_test = pad_sequences(X_test, maxlen=max_length, padding='post')
+
+# Step 6: Build LSTM Model
+model = Sequential([
+    Embedding(vocab_size, 64),
+    LSTM(64),
+    Dropout(0.5),
+    Dense(32, activation='relu'),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(optimizer='adam',
+              loss='binary_crossentropy',
+              metrics=['accuracy'])
+
+model.summary()
+
+# Step 7: Train Model
+history = model.fit(
+    X_train, y_train,
+    epochs=5,
+    batch_size=64,
+    validation_split=0.2
+)
+
+# Step 8: Evaluate Model
+loss, accuracy = model.evaluate(X_test, y_test)
+
+print("\nTest Loss:", loss)
+print("Test Accuracy:", round(accuracy * 100, 2), "%")
+
+# Step 9: Accuracy Graph
+plt.figure(figsize=(7, 4))
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('LSTM Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.grid()
+plt.show()
+
+# Step 10: Loss Graph
+plt.figure(figsize=(7, 4))
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('LSTM Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.grid()
+plt.show()
+
+# Step 11: Actual vs Predicted Sentiment
+predictions = model.predict(X_test[:5])
+
+print("\nACTUAL VS PREDICTED SENTIMENT")
+
+for i in range(5):
+    actual = "Positive" if y_test[i] == 1 else "Negative"
+    predicted = "Positive" if predictions[i][0] >= 0.5 else "Negative"
+
+    confidence = predictions[i][0] if predictions[i][0] >= 0.5 else 1-predictions[i][0]
+
+    print(f"\nReview {i+1}")
+    print("Actual   :", actual)
+    print("Predicted:", predicted)
+    print("Probability:", round(float(confidence), 7))
+
+# Step 12: Custom Review Predictions
+reviews = [
+    "This movie was amazing and I really enjoyed it",
+    "The movie was boring and disappointing",
+    "Excellent acting and wonderful storyline",
+    "Worst movie ever, I wasted my time"
+]
+
+seq = tokenizer.texts_to_sequences(reviews)
+pad = pad_sequences(seq, maxlen=max_length, padding='post')
+pred = model.predict(pad)
+
+print("\nCUSTOM REVIEW PREDICTIONS")
+
+for review, p in zip(reviews, pred):
+    sentiment = "Positive" if p[0] >= 0.5 else "Negative"
+    confidence = p[0] if p[0] >= 0.5 else 1-p[0]
+
+    print("\nReview:", review)
+    print("Predicted:", sentiment)
+    print("Probability:", round(float(confidence), 7))

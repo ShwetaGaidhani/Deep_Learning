@@ -1,0 +1,120 @@
+# %pip install tensorflow numpy pandas matplotlib tensorboard
+
+# Step 1: Import Libraries
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+from tensorflow.keras.callbacks import TensorBoard
+
+# Step 2: Load Local MNIST Dataset
+(x_train, y_train), (x_test, y_test) = (
+    (np.fromfile('MNIST/train-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/train-labels-idx1-ubyte', np.uint8)[8:]),
+    (np.fromfile('MNIST/t10k-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/t10k-labels-idx1-ubyte', np.uint8)[8:])
+)
+'''
+# Step 2: Load Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+'''
+
+# Step 3: Normalize Data
+x_train = x_train / 255.0
+x_test = x_test / 255.0
+
+# Step 4: Define Hyperparameter Configurations
+configs = [
+    [0.01, 32, 1],
+    [0.001, 64, 2],
+    [0.0001, 128, 3]
+]
+
+results = []
+
+# Step 5: Train Models with Different Configurations
+for i, (lr, batch, layers) in enumerate(configs):
+
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Flatten(input_shape=(28, 28)))
+
+    for j in range(layers):
+        model.add(tf.keras.layers.Dense(128, activation='relu'))
+
+    model.add(tf.keras.layers.Dense(10, activation='softmax'))
+
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+
+    # TensorBoard Logging
+    tb = TensorBoard(log_dir=f'logs/experiment_{i+1}')
+
+    print(f"\nTraining Experiment {i+1}")
+
+    model.fit(
+        x_train, y_train,
+        epochs=3,
+        batch_size=batch,
+        validation_split=0.2,
+        callbacks=[tb],
+        verbose=1
+    )
+
+    # Evaluate Model
+    loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
+
+    results.append([lr, batch, layers, accuracy, loss])
+
+# Step 6: Display Comparison Table
+df = pd.DataFrame(results, columns=[
+    'Learning Rate', 'Batch Size', 'Layers',
+    'Accuracy', 'Loss'
+])
+
+print("\nHyperparameter Comparison:")
+print(df)
+
+# Step 7: Plot Accuracy Comparison
+plt.figure(figsize=(8, 5))
+plt.plot(df['Accuracy'], marker='o')
+plt.xticks([0, 1, 2], ['Config 1', 'Config 2', 'Config 3'])
+plt.xlabel('Configurations')
+plt.ylabel('Accuracy')
+plt.title('Hyperparameter Accuracy Comparison')
+plt.show()
+
+# Step 8: Plot Loss Comparison
+plt.figure(figsize=(8, 5))
+plt.plot(df['Loss'], marker='o')
+plt.xticks([0, 1, 2], ['Config 1', 'Config 2', 'Config 3'])
+plt.xlabel('Configurations')
+plt.ylabel('Loss')
+plt.title('Hyperparameter Loss Comparison')
+plt.show()
+
+'''plt.figure(figsize=(8, 5))
+plt.bar(['Config 1', 'Config 2', 'Config 3'], df['Accuracy'])
+plt.xlabel('Configurations')
+plt.ylabel('Accuracy')
+plt.title('Hyperparameter Accuracy Comparison')
+plt.show()
+
+plt.figure(figsize=(8, 5))
+plt.bar(['Config 1', 'Config 2', 'Config 3'], df['Loss'])
+plt.xlabel('Configurations')
+plt.ylabel('Loss')
+plt.title('Hyperparameter Loss Comparison')
+plt.show()
+'''
+%load_ext tensorboard
+%tensorboard --logdir logs   

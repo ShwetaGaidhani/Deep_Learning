@@ -1,0 +1,412 @@
+!pip install numpy matplotlib tensorflow scikit-learn
+
+# printing all the values .............................
+
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.regularizers import l2
+from sklearn.model_selection import train_test_split
+
+# Load dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+print("Training data:", x_train.shape)
+print("Testing data:", x_test.shape)
+
+'''
+# Step 2: Load Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+'''
+(x_train, y_train), (x_test, y_test) = (
+    (np.fromfile('MNIST/train-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/train-labels-idx1-ubyte', np.uint8)[8:]),
+    (np.fromfile('MNIST/t10k-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/t10k-labels-idx1-ubyte', np.uint8)[8:])
+)
+'''
+'''
+# Flatten and normalize
+x_train = x_train.reshape(-1, 784) / 255.0
+x_test = x_test.reshape(-1, 784) / 255.0
+
+# Split training and validation data
+x_train, x_val, y_train, y_val = train_test_split(
+    x_train, y_train, test_size=0.1, random_state=42
+)
+
+print("Training:", x_train.shape)
+print("Validation:", x_val.shape)
+
+# Normal model
+model1 = Sequential([
+    tf.keras.Input(shape=(784,)),
+    Dense(128, activation='relu'),
+    Dense(10, activation='softmax')
+])
+
+model1.compile(optimizer='adam', loss='sparse_categorical_crossentropy',
+               metrics=['accuracy'])
+
+history1 = model1.fit(x_train, y_train, epochs=5, batch_size=128,
+                      validation_data=(x_val, y_val))
+
+print("Normal model training completed!")
+
+# L2 model
+model2 = Sequential([
+    tf.keras.Input(shape=(784,)),
+    Dense(128, activation='relu', kernel_regularizer=l2(0.001)),
+    Dense(10, activation='softmax')
+])
+
+model2.compile(optimizer='adam', loss='sparse_categorical_crossentropy',
+               metrics=['accuracy'])
+
+history2 = model2.fit(x_train, y_train, epochs=5, batch_size=128,
+                      validation_data=(x_val, y_val))
+
+print("L2 model training completed!")
+
+# Dropout model
+model3 = Sequential([
+    tf.keras.Input(shape=(784,)),
+    Dense(128, activation='relu'),
+    Dropout(0.3),
+    Dense(10, activation='softmax')
+])
+
+model3.compile(optimizer='adam', loss='sparse_categorical_crossentropy',
+               metrics=['accuracy'])
+
+history3 = model3.fit(x_train, y_train, epochs=5, batch_size=128,
+                      validation_data=(x_val, y_val))
+
+print("Dropout model training completed!")
+
+# Evaluate models
+acc1 = model1.evaluate(x_test, y_test, verbose=0)[1]
+acc2 = model2.evaluate(x_test, y_test, verbose=0)[1]
+acc3 = model3.evaluate(x_test, y_test, verbose=0)[1]
+
+print("\nNormal Model Accuracy:", acc1 * 100, "%")
+print("L2 Model Accuracy:", acc2 * 100, "%")
+print("Dropout Model Accuracy:", acc3 * 100, "%")
+
+# Accuracy comparison
+plt.bar(['Normal', 'L2', 'Dropout'], [acc1*100, acc2*100, acc3*100])
+plt.title("Comparison of Model Accuracy")
+plt.xlabel("Regularization Techniques")
+plt.ylabel("Accuracy (%)")
+plt.show()
+
+# Validation loss comparison
+plt.figure(figsize=(10, 5))
+plt.plot(history1.history['val_loss'], label='Normal')
+plt.plot(history2.history['val_loss'], label='L2')
+plt.plot(history3.history['val_loss'], label='Dropout')
+plt.title("Validation Loss Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.show()
+
+# Validation accuracy comparison
+plt.figure(figsize=(10, 5))
+plt.plot(history1.history['val_accuracy'], label='Normal')
+plt.plot(history2.history['val_accuracy'], label='L2')
+plt.plot(history3.history['val_accuracy'], label='Dropout')
+plt.title("Validation Accuracy Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()
+
+# short 
+
+# Step 1: Import Libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.regularizers import l2
+from sklearn.model_selection import train_test_split
+
+# Step 2: Load Dataset
+data = np.load('mnist.npz')
+x_train, y_train = data['x_train'], data['y_train']
+x_test, y_test = data['x_test'], data['y_test']
+
+print("Training data:", x_train.shape)
+print("Testing data:", x_test.shape)
+'''
+# Step 2: Load Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+
+(x_train, y_train), (x_test, y_test) = (
+    (np.fromfile('MNIST/train-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/train-labels-idx1-ubyte', np.uint8)[8:]),
+    (np.fromfile('MNIST/t10k-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/t10k-labels-idx1-ubyte', np.uint8)[8:])
+)
+
+'''
+# Step 3: Preprocess Dataset
+x_train = x_train.reshape(-1, 784) / 255.0
+x_test = x_test.reshape(-1, 784) / 255.0
+
+x_train, x_val, y_train, y_val = train_test_split(
+    x_train, y_train, test_size=0.1, random_state=42
+)
+
+print("Training:", x_train.shape)
+print("Validation:", x_val.shape)
+
+# Step 4: Define and Train Models
+def train_model(regularization=None):
+
+    layers = [
+        tf.keras.Input(shape=(784,)),
+        Dense(128, activation='relu',
+              kernel_regularizer=regularization if regularization != 'dropout' else None)
+    ]
+
+    if regularization == 'dropout':
+        layers.append(Dropout(0.3))
+
+    layers.append(Dense(10, activation='softmax'))
+
+    model = Sequential(layers)
+
+    model.compile(optimizer='adam',
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    history = model.fit(
+        x_train, y_train, epochs=5, batch_size=128,
+        validation_data=(x_val, y_val)
+    )
+
+    return model, history
+# Step 5: Train Normal, L2 and Dropout Models
+model1, history1 = train_model()
+print("Normal model training completed!")
+
+model2, history2 = train_model(l2(0.001))
+print("L2 model training completed!")
+
+model3, history3 = train_model('dropout')
+print("Dropout model training completed!")
+
+# Step 6: Evaluate Models
+models = [model1, model2, model3]
+histories = [history1, history2, history3]
+names = ['Normal', 'L2', 'Dropout']
+
+accuracies = [
+    model.evaluate(x_test, y_test, verbose=0)[1] * 100
+    for model in models
+]
+
+for name, acc in zip(names, accuracies):
+    print(name, "Model Accuracy:", acc, "%")
+
+# Step 7: Accuracy Comparison
+plt.bar(names, accuracies)
+plt.title("Comparison of Model Accuracy")
+plt.xlabel("Regularization Techniques")
+plt.ylabel("Accuracy (%)")
+plt.show()
+
+# Step 8: Validation Loss Comparison
+for history, name in zip(histories, names):
+    plt.plot(history.history['val_loss'], label=name)
+
+plt.title("Validation Loss Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.show()
+
+# Step 9: Validation Accuracy Comparison
+for history, name in zip(histories, names):
+    plt.plot(history.history['val_accuracy'], label=name)
+
+plt.title("Validation Accuracy Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()
+
+
+# data folder 
+
+#%pip install tensorflow numpy matplotlib scikit-learn
+
+
+# local dataset
+
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+import struct
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.regularizers import l2
+from sklearn.model_selection import train_test_split
+
+# Load images
+def load_images(file):
+    with open(file, 'rb') as f:
+        magic, num, rows, cols = struct.unpack('>IIII', f.read(16))
+        images = np.frombuffer(f.read(), dtype=np.uint8)
+    return images.reshape(num, rows, cols)
+
+# Load labels
+def load_labels(file):
+    with open(file, 'rb') as f:
+        magic, num = struct.unpack('>II', f.read(8))
+        labels = np.frombuffer(f.read(), dtype=np.uint8)
+    return labels
+
+# Load MNIST dataset
+x_train = load_images('MNIST/train-images-idx3-ubyte')
+y_train = load_labels('MNIST/train-labels-idx1-ubyte')
+x_test = load_images('MNIST/t10k-images-idx3-ubyte')
+y_test = load_labels('MNIST/t10k-labels-idx1-ubyte')
+'''
+# Step 2: Load Local MNIST Dataset
+data = np.load('mnist.npz')
+
+x_train = data['x_train']
+y_train = data['y_train']
+x_test = data['x_test']
+y_test = data['y_test']
+
+print("Training Data:", x_train.shape)
+print("Testing Data:", x_test.shape)
+'''
+(x_train, y_train), (x_test, y_test) = (
+    (np.fromfile('MNIST/train-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/train-labels-idx1-ubyte', np.uint8)[8:]),
+    (np.fromfile('MNIST/t10k-images-idx3-ubyte', np.uint8)[16:].reshape(-1, 28, 28),
+     np.fromfile('MNIST/t10k-labels-idx1-ubyte', np.uint8)[8:])
+)
+'''
+'''
+# Flatten and normalize
+x_train = x_train.reshape(-1, 784) / 255.0
+x_test = x_test.reshape(-1, 784) / 255.0
+
+# Split training and validation data
+x_train, x_val, y_train, y_val = train_test_split(
+    x_train, y_train, test_size=0.1, random_state=42
+)
+
+# Normal model
+model1 = Sequential([
+    tf.keras.Input(shape=(784,)),
+    Dense(128, activation='relu'),
+    Dense(10, activation='softmax')
+])
+
+model1.compile(optimizer='adam',
+               loss='sparse_categorical_crossentropy',
+               metrics=['accuracy'])
+
+history1 = model1.fit(x_train, y_train, epochs=5, batch_size=128,
+                      validation_data=(x_val, y_val))
+
+# L2 Regularization model
+model2 = Sequential([
+    tf.keras.Input(shape=(784,)),
+    Dense(128, activation='relu', kernel_regularizer=l2(0.001)),
+    Dense(10, activation='softmax')
+])
+
+model2.compile(optimizer='adam',
+               loss='sparse_categorical_crossentropy',
+               metrics=['accuracy'])
+
+history2 = model2.fit(x_train, y_train, epochs=5, batch_size=128,
+                      validation_data=(x_val, y_val))
+
+# Dropout model
+model3 = Sequential([
+    tf.keras.Input(shape=(784,)),
+    Dense(128, activation='relu'),
+    Dropout(0.3),
+    Dense(10, activation='softmax')
+])
+
+model3.compile(optimizer='adam',
+               loss='sparse_categorical_crossentropy',
+               metrics=['accuracy'])
+
+history3 = model3.fit(x_train, y_train, epochs=5, batch_size=128,
+                      validation_data=(x_val, y_val))
+
+# Evaluate models
+acc1 = model1.evaluate(x_test, y_test, verbose=0)[1]
+acc2 = model2.evaluate(x_test, y_test, verbose=0)[1]
+acc3 = model3.evaluate(x_test, y_test, verbose=0)[1]
+
+print("Normal Model Accuracy:", acc1 * 100, "%")
+print("L2 Model Accuracy:", acc2 * 100, "%")
+print("Dropout Model Accuracy:", acc3 * 100, "%")
+
+# Accuracy comparison
+plt.bar(['Normal', 'L2', 'Dropout'],
+        [acc1*100, acc2*100, acc3*100])
+plt.title("Comparison of Model Accuracy")
+plt.xlabel("Regularization Techniques")
+plt.ylabel("Accuracy (%)")
+plt.show()
+
+# Validation loss comparison
+plt.figure(figsize=(10, 5))
+plt.plot(history1.history['val_loss'], label='Normal')
+plt.plot(history2.history['val_loss'], label='L2')
+plt.plot(history3.history['val_loss'], label='Dropout')
+plt.title("Validation Loss Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.show()
+
+# Validation accuracy comparison
+plt.figure(figsize=(10, 5))
+plt.plot(history1.history['val_accuracy'], label='Normal')
+plt.plot(history2.history['val_accuracy'], label='L2')
+plt.plot(history3.history['val_accuracy'], label='Dropout')
+plt.title("Validation Accuracy Comparison")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()

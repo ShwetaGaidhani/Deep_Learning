@@ -1,0 +1,10 @@
+﻿.ipynb_checkpoints/
+*-checkpoint.ipynb
+__pycache__/
+*.csv
+*.zip
+*.npz
+*.ubyte
+MNIST/
+cats_and_dogs_filtered/
+cats_vs_dogs/

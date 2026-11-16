@@ -1,0 +1,105 @@
+# Step 1: Import Libraries
+import tensorflow as tf
+import matplotlib.pyplot as plt
+
+# Step 2: Load Dataset
+'''
+path = "cats_vs_dogs"
+
+train = tf.keras.utils.image_dataset_from_directory(
+    path, validation_split=0.2, subset="training",
+    seed=123, image_size=(224,224), batch_size=32
+)
+
+test = tf.keras.utils.image_dataset_from_directory(
+    path, validation_split=0.2, subset="validation",
+    seed=123, image_size=(224,224), batch_size=32
+)
+
+'''
+train = tf.keras.utils.image_dataset_from_directory(
+    'cats_vs_dogs',
+    image_size=(224,224),
+    batch_size=32,
+    validation_split=0.2,
+    subset='training',
+    seed=123
+)
+
+val = tf.keras.utils.image_dataset_from_directory(
+    'cats_vs_dogs',
+    image_size=(224,224),
+    batch_size=32,
+    validation_split=0.2,
+    subset='validation',
+    seed=123
+)
+
+# Step 3: Load Pretrained ResNet50
+base_model = tf.keras.applications.ResNet50(
+    weights='imagenet',
+    include_top=False,
+    input_shape=(224,224,3)
+)
+
+# Step 4: Freeze Layers
+base_model.trainable = False
+
+# Step 5: Build Model
+model = tf.keras.Sequential([
+    tf.keras.layers.Input(shape=(224,224,3)),
+    tf.keras.layers.Lambda(
+        tf.keras.applications.resnet50.preprocess_input
+    ),
+    base_model,
+    tf.keras.layers.GlobalAveragePooling2D(),
+    tf.keras.layers.Dense(2, activation='softmax')
+])
+
+# Step 6: Compile Model
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Step 7: Train Frozen Model
+h1 = model.fit(train, validation_data=val, epochs=3)
+
+# Step 8: Fine-Tune Last 10 Layers
+base_model.trainable = True
+
+for layer in base_model.layers[:-10]:
+    layer.trainable = False
+
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(0.0001),
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Step 9: Train Fine-Tuned Model
+h2 = model.fit(train, validation_data=val, epochs=3)
+
+# Step 10: Compare Performance
+print("Before Fine Tuning:", h1.history['val_accuracy'][-1])
+print("After Fine Tuning:", h2.history['val_accuracy'][-1])
+
+# Step 11: Plot Accuracy
+plt.plot(h1.history['val_accuracy'], label='Frozen')
+plt.plot(h2.history['val_accuracy'], label='Fine Tuned')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.title('ResNet50 Transfer Learning')
+plt.legend()
+plt.show()
+
+# 12 : Plot Validation Loss
+plt.plot(h1.history['val_loss'], label='Frozen')
+plt.plot(h2.history['val_loss'], label='Fine Tuned')
+
+plt.xlabel('Epochs')
+plt.ylabel('Validation Loss')
+plt.title('ResNet50 Validation Loss')
+plt.legend()
+plt.show()
